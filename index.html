@@ -104,10 +104,10 @@ const $=id=>document.getElementById(id);let currentPage='boards';
 
 let loginRole='institution';
 const demoInstitutions={
- 'AKS001':{password:'Tahta2026!',name:'Akşehir Örnek Okulu',status:'active'},
+ 'okul1':{password:'okul1',name:'Okul 1',code:'OKUL1',status:'active'},
  'KNY002':{password:'Okul2026!',name:'Konya Örnek Okulu',status:'inactive'}
 };
-const demoAdmin={username:'admin',password:'Admin2026!'};
+const demoAdmin={username:'admin',password:'admin'};
 let schools=[
  {id:1,name:'Akşehir Örnek Okulu',code:'AKS001',contact:'Mehmet Karadeniz',email:'yonetim@aksehir.meb.k12.tr',status:'active'},
  {id:2,name:'Konya Örnek Okulu',code:'KNY002',contact:'Okul Yöneticisi',email:'yonetim@konya.meb.k12.tr',status:'inactive'},
@@ -148,9 +148,9 @@ $('loginForm').addEventListener('submit',e=>{
   if($('institutionCode').value.trim()!==demoAdmin.username||password!==demoAdmin.password){$('loginError').textContent='Yönetici kullanıcı adı veya şifre hatalı.';$('loginError').style.display='block';return;}
   $('loginError').style.display='none';showDashboard(null,'',true);return;
  }
- const code=$('institutionCode').value.trim().toUpperCase();const institution=demoInstitutions[code];
+ const code=$('institutionCode').value.trim().toLowerCase();const institution=demoInstitutions[code];
  if(!institution||institution.password!==password||institution.status!=='active'){$('loginError').textContent=institution&&institution.status==='inactive'?'Bu kurum pasif durumda. Sistem yöneticisiyle iletişime geçin.':institution&&institution.status==='pending'?'Kurum başvurunuz henüz onaylanmadı.':'Kurum kodu veya şifre hatalı.';$('loginError').style.display='block';return;}
- $('loginError').style.display='none';loggedInstitution={...institution,code};showDashboard(institution,code,false);
+ $('loginError').style.display='none';loggedInstitution={...institution,code};showDashboard(institution,institution.code||code,false);
 });
 $('logoutBtn').addEventListener('click',()=>{$('institutionPassword').value='';$('loginForm').reset();loggedInstitution=null;setLoginRole('institution');showLogin();});
 function renderSchools(){
