@@ -24,7 +24,7 @@
 .status-tag{display:inline-flex;padding:5px 9px;border-radius:20px;font-size:10px;font-weight:700}.status-tag.pending{background:#fff4df;color:#a96b12}.status-tag.active{background:#e8f6ef;color:#16845d}.status-tag.inactive{background:#fff0ef;color:#c44949}
 .admin-actions{display:flex;gap:6px}.admin-actions button{border:1px solid var(--line);background:white;border-radius:7px;padding:7px 9px;font-size:10px;font-weight:700;color:#536078}.admin-actions .approve{background:var(--blue);color:#fff;border-color:var(--blue)}
 @media(max-width:700px){.login-card{padding:25px 21px}.admin-actions{flex-wrap:wrap}}
-</style>
+.login-screen{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;padding:20px;background:radial-gradient(circle at 15% 15%,#284a7c,#0d172a 70%)}.login-card{width:min(430px,100%);background:#fff;border-radius:20px;padding:32px;box-shadow:0 30px 90px #020a1b66}.login-brand{display:flex;align-items:center;gap:13px;margin-bottom:26px}.login-brand strong{font:800 19px Manrope;color:#172033}.login-brand small{display:block;color:#7c879b;font-size:11px}.login-card h1{font:800 25px Manrope;margin:0 0 7px}.login-intro{color:#7c879b;font-size:13px;margin:0 0 22px}.role-switch{display:flex;background:#f1f4f9;padding:4px;border-radius:10px;margin-bottom:20px}.role-switch button{flex:1;border:0;background:transparent;border-radius:7px;padding:10px;color:#718097;font-weight:700}.role-switch button.active{background:white;color:#2864d7;box-shadow:0 2px 8px #182b4b12}.login-card .field{margin-bottom:15px}.login-card .field input{width:100%;padding:13px;border:1px solid #e8ecf2;border-radius:8px}.login-submit{width:100%;justify-content:center;padding:13px}.login-error{display:none;background:#fff0ef;color:#b43e3e;border-radius:8px;padding:10px;margin-bottom:14px;font-size:12px}.login-hint{border-top:1px solid #e8ecf2;margin-top:18px;padding-top:14px;color:#8a95a7;font-size:10px;line-height:1.6}</style>
 </head>
 <body>
 <div class="app">
@@ -32,7 +32,7 @@
  <div class="brand"><div class="brand-mark">T</div><div><strong>TAHTA KİLİT</strong><small>Akıllı tahta yönetimi</small></div></div>
  <div class="nav-label">Yönetim</div>
  <nav class="nav">
-  <button class="active" data-page="boards"><span class="ico">▦</span>Tahtalar</button>
+  <button class="active" data-page="boards"><span class="ico">▦</span>Tahtalar</button><button data-page="schools" id="schoolsNav" style="display:none"><span class="ico">▣</span>Kurumlar</button>
   <button data-page="notices"><span class="ico">▧</span>Duyurular</button>
   <button data-page="keys"><span class="ico">⌑</span>Anahtarlar</button>
   <button data-page="schedule"><span class="ico">◷</span>Ders saatleri</button>
@@ -76,7 +76,7 @@
 </section>
 <section class="section" id="page-keys">
  <div class="page-head"><div><div class="eyebrow">Yetkilendirme</div><h1>Anahtarlar</h1><p>Öğretmenlerin tahta kilidini açma yetkilerini yönetin.</p></div><button class="btn btn-primary" id="newKey">＋ Anahtar oluştur</button></div>
- <div class="panel"><div class="panel-head"><div><div class="panel-title">Öğretmen yetkileri</div><div class="panel-sub">Örnek kayıtlar · Gerçek yetkilendirme bağlantısı henüz kurulmadı</div></div></div><div class="key-list"><div class="key-row"><div><b>Ahmet Yılmaz</b><small>Öğretmen kodu: TK-0001 · Süresiz değil, 30.06.2027 tarihine kadar</small></div><span class="pill online">Aktif</span></div><div class="key-row"><div><b>Selin Demir</b><small>Öğretmen kodu: TK-0002 · 30.06.2027 tarihine kadar</small></div><span class="pill online">Aktif</span></div><div class="key-row"><div><b>Mehmet Kaya</b><small>Öğretmen kodu: TK-0003 · Yetki iptal edildi</small></div><span class="pill offline">Pasif</span></div></div></div>
+ <div class="panel"><div class="panel-head"><div><div class="panel-title">Öğretmen yetkileri</div><div class="panel-sub">Örnek kayıtlar · Gerçek yetkilendirme bağlantısı henüz kurulmadı</div></div></div><div class="key-list" id="keyRows"><div class="key-row"><div><b>Ahmet Yılmaz</b><small>Öğretmen kodu: TK-0001 · Süresiz değil, 30.06.2027 tarihine kadar</small></div><span class="pill online">Aktif</span></div><div class="key-row"><div><b>Selin Demir</b><small>Öğretmen kodu: TK-0002 · 30.06.2027 tarihine kadar</small></div><span class="pill online">Aktif</span></div><div class="key-row"><div><b>Mehmet Kaya</b><small>Öğretmen kodu: TK-0003 · Yetki iptal edildi</small></div><span class="pill offline">Pasif</span></div></div></div>
 </section>
 <section class="section" id="page-schedule">
  <div class="page-head"><div><div class="eyebrow">Zaman yönetimi</div><h1>Ders saatleri</h1><p>Tahtaların okul çalışma saatlerini ve ders çizelgesini tanımlayın.</p></div><button class="btn btn-primary" id="saveSchedule">Değişiklikleri kaydet</button></div>
@@ -90,101 +90,36 @@
 <div class="modal-backdrop" id="modalBackdrop"><div class="modal"><h2 id="modalTitle">Yeni duyuru</h2><p id="modalDesc">Tahtalarda yayınlanacak duyuru bilgilerini girin.</p><form id="modalForm"><div class="field"><label>Başlık</label><input id="noticeTitle" required placeholder="Örn. 23 Nisan etkinliği"></div><div class="field"><label>Açıklama</label><textarea id="noticeText" placeholder="Duyuru açıklaması..."></textarea></div><div class="field"><label>Yayın hedefi</label><select id="noticeTarget"><option>Tüm tahtalar</option><option>Belirli sınıflar</option></select></div><div class="modal-actions"><button type="button" class="btn" id="cancelModal">Vazgeç</button><button class="btn btn-primary" type="submit">Duyuruyu kaydet</button></div></form></div></div>
 <div class="toast" id="toast"></div>
 <script>
-const boards=[
- {id:'12',name:'9-A Sınıfı',sub:'Tahta 12',status:'locked',online:true,last:'A. Yılmaz',method:'Flash'},
- {id:'14',name:'9-B Sınıfı',sub:'Tahta 14',status:'open',online:true,last:'S. Demir',method:'Telefon kodu'},
- {id:'21',name:'10-C Fizik Laboratuvarı',sub:'Tahta 21',status:'locked',online:true,last:'M. Kaya',method:'Flash'},
- {id:'31',name:'11-A Sınıfı',sub:'Tahta 31',status:'open',online:true,last:'E. Arslan',method:'Flash'},
- {id:'03',name:'Konferans Salonu',sub:'Tahta 03',status:'locked',online:false,last:'—',method:'—'},
- {id:'02',name:'Öğretmenler Odası',sub:'Tahta 02',status:'locked',online:true,last:'—',method:'—'}
-];
-
-const $=id=>document.getElementById(id);let currentPage='boards';
-/* SADECE ARAYÜZ TESTİ: gerçek kullanımda bu sabit hesaplar kaldırılmalı ve Firebase Authentication kullanılmalı. */
-
-let loginRole='institution';
-const demoInstitutions={
- 'okul1':{password:'okul1',name:'Okul 1',code:'OKUL1',status:'active'},
- 'KNY002':{password:'Okul2026!',name:'Konya Örnek Okulu',status:'inactive'}
-};
-const demoAdmin={username:'admin',password:'admin'};
-let schools=[
- {id:1,name:'Akşehir Örnek Okulu',code:'AKS001',contact:'Mehmet Karadeniz',email:'yonetim@aksehir.meb.k12.tr',status:'active'},
- {id:2,name:'Konya Örnek Okulu',code:'KNY002',contact:'Okul Yöneticisi',email:'yonetim@konya.meb.k12.tr',status:'inactive'},
- {id:3,name:'Yenişehir Ortaokulu',code:'YENI001',contact:'Ayşe Demir',email:'ayse@example.com',status:'pending'}
-];
-let loggedInstitution=null;
-function showLogin(){ $('loginScreen').style.display='flex';$('dashboardApp').style.display='none'; }
-function showDashboard(institution,code,isAdmin=false){
- $('loginScreen').style.display='none';$('dashboardApp').style.display='flex';
- $('schoolNameSide').textContent=isAdmin?'Merkezi Yönetim':institution.name;
- $('schoolNameTop').textContent=isAdmin?'Sistem yöneticisi':institution.name;
- $('schoolCodeSide').textContent=isAdmin?'Tüm kurumlar':('Kurum: '+code);
- $('schoolsNav').style.display=isAdmin?'flex':'none';
- document.title='Tahta Kilit | '+(isAdmin?'Merkezi Yönetim':institution.name);
- document.querySelector('[data-page="schools"]').style.display=isAdmin?'flex':'none';
- if(isAdmin){document.querySelector('[data-page="schools"]').click();renderSchools();}
- else{document.querySelector('[data-page="boards"]').click();}
-}
-function setLoginRole(role){
- loginRole=role;
- $('institutionMode').classList.toggle('active',role==='institution');
- $('adminMode').classList.toggle('active',role==='admin');
- $('institutionField').style.display=role==='admin'?'none':'grid';
- $('institutionCode').required=role!=='admin';
- $('loginTitle').textContent=role==='admin'?'Sistem yöneticisi girişi':'Kurum girişi';
- $('loginIntro').textContent=role==='admin'?'Kayıt olan kurumları ve sistem erişimlerini merkezi olarak yönetin.':'Okulunuza ait kurum kodu ve yönetici şifresiyle giriş yapın.';
- $('loginError').style.display='none';
- $('registerOpen').style.display=role==='admin'?'none':'inline-block';
- $('backToInstitution').style.display=role==='admin'?'inline-block':'none';
- $('passwordLabel').textContent=role==='admin'?'Yönetici şifresi':'Kurum şifresi';
-}
-$('institutionMode').onclick=()=>setLoginRole('institution');
-$('adminMode').onclick=()=>setLoginRole('admin');
-$('backToInstitution').onclick=()=>setLoginRole('institution');
-$('loginForm').addEventListener('submit',e=>{
- e.preventDefault();const password=$('institutionPassword').value;
- if(loginRole==='admin'){
-  if($('institutionCode').value.trim()!==demoAdmin.username||password!==demoAdmin.password){$('loginError').textContent='Yönetici kullanıcı adı veya şifre hatalı.';$('loginError').style.display='block';return;}
-  $('loginError').style.display='none';showDashboard(null,'',true);return;
- }
- const code=$('institutionCode').value.trim().toLowerCase();const institution=demoInstitutions[code];
- if(!institution||institution.password!==password||institution.status!=='active'){$('loginError').textContent=institution&&institution.status==='inactive'?'Bu kurum pasif durumda. Sistem yöneticisiyle iletişime geçin.':institution&&institution.status==='pending'?'Kurum başvurunuz henüz onaylanmadı.':'Kurum kodu veya şifre hatalı.';$('loginError').style.display='block';return;}
- $('loginError').style.display='none';loggedInstitution={...institution,code};showDashboard(institution,institution.code||code,false);
-});
-$('logoutBtn').addEventListener('click',()=>{$('institutionPassword').value='';$('loginForm').reset();loggedInstitution=null;setLoginRole('institution');showLogin();});
-function renderSchools(){
- const filter=$('schoolFilter').value;
- const visible=schools.filter(x=>filter==='all'||x.status===filter);
- $('schoolRows').innerHTML=visible.map(x=>'<tr><td><b>'+escapeHtml(x.name)+'</b></td><td>'+escapeHtml(x.code)+'</td><td>'+escapeHtml(x.contact)+'</td><td><span class="status-tag '+x.status+'">'+(x.status==='pending'?'Onay bekliyor':x.status==='active'?'Aktif':'Pasif')+'</span></td><td><div class="admin-actions">'+(x.status==='pending'?'<button class="approve" data-school-action="approve" data-id="'+x.id+'">Onayla</button>':'')+'<button data-school-action="edit" data-id="'+x.id+'">Düzenle</button>'+(x.status==='active'?'<button data-school-action="deactivate" data-id="'+x.id+'">Pasife al</button>':x.status==='inactive'?'<button class="approve" data-school-action="activate" data-id="'+x.id+'">Aktifleştir</button>':'')+'</div></td></tr>').join('');
- $('schoolTotal').textContent=schools.length;$('schoolPending').textContent=schools.filter(x=>x.status==='pending').length;$('schoolActive').textContent=schools.filter(x=>x.status==='active').length;$('schoolInactive').textContent=schools.filter(x=>x.status==='inactive').length;$('schoolRowCount').textContent=visible.length+' kurum gösteriliyor';
-}
-function escapeHtml(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-$('schoolFilter').addEventListener('change',renderSchools);$('refreshSchools').onclick=()=>{renderSchools();toast('Kurum listesi yenilendi.');};
-$('schoolRows').addEventListener('click',e=>{
- const btn=e.target.closest('button[data-school-action]');if(!btn)return;
- const school=schools.find(x=>x.id===Number(btn.dataset.id));if(!school)return;
- const action=btn.dataset.schoolAction;
- if(action==='approve'){school.status='active';if(!demoInstitutions[school.code])demoInstitutions[school.code]={password:'IlkGiris2026!',name:school.name,status:'active'};else demoInstitutions[school.code].status='active';toast(school.name+' onaylandı.');}
- if(action==='activate'){school.status='active';if(demoInstitutions[school.code])demoInstitutions[school.code].status='active';toast('Kurum aktifleştirildi.');}
- if(action==='deactivate'){school.status='inactive';if(demoInstitutions[school.code])demoInstitutions[school.code].status='inactive';toast('Kurum pasife alındı; giriş engellendi.');}
- if(action==='edit'){
-  const name=prompt('Kurum adı:',school.name);if(name===null)return;
-  const contact=prompt('Yetkili adı:',school.contact);if(contact===null)return;
-  const email=prompt('E-posta:',school.email);if(email===null)return;
-  school.name=name.trim()||school.name;school.contact=contact.trim()||school.contact;school.email=email.trim()||school.email;
-  if(demoInstitutions[school.code])demoInstitutions[school.code].name=school.name;
-  toast('Kurum bilgileri güncellendi.');
- }
- renderSchools();
-});
-$('registerOpen').onclick=()=>$('registerBackdrop').classList.add('show');
-$('registerCancel').onclick=()=>$('registerBackdrop').classList.remove('show');
-$('registerBackdrop').addEventListener('click',e=>{if(e.target===$('registerBackdrop'))$('registerBackdrop').classList.remove('show')});
-$('registerForm').addEventListener('submit',e=>{
- e.preventDefault();const code=$('regCode').value.trim().toUpperCase();
- if(schools.some(x=>x.code===code)){alert('Bu kurum kodu zaten kullanılıyor.');return;}
- schools.push({id:Date.now(),name:$('regSchool').value.trim(),code,contact:$('regAdmin').value.trim(),email:$('regEmail').value.trim(),status:'pending'});
- $('registerForm').reset();$('registerBackdrop').classList.remove('show');alert('Başvurunuz alındı. Sistem yöneticisinin onayından sonra kurumunuz etkinleştirilecek.');
-});
->
+const $=id=>document.getElementById(id);
+let loginRole='school',currentPage='boards',loggedAccount=null;
+const accounts={admin:{password:'admin',role:'admin',name:'Merkezi Yönetim'},okul1:{password:'okul1',role:'school',name:'Okul 1',code:'OKUL1'},okul2:{password:'okul2',role:'school',name:'Okul 2',code:'OKUL2'}};
+const boards=[{id:'12',name:'9-A Sınıfı',sub:'Tahta 12',status:'locked',online:true,last:'A. Yılmaz',method:'Flash'},{id:'14',name:'9-B Sınıfı',sub:'Tahta 14',status:'open',online:true,last:'S. Demir',method:'Telefon kodu'},{id:'21',name:'10-C Fizik Laboratuvarı',sub:'Tahta 21',status:'locked',online:true,last:'M. Kaya',method:'Flash'},{id:'31',name:'11-A Sınıfı',sub:'Tahta 31',status:'open',online:true,last:'E. Arslan',method:'Flash'},{id:'03',name:'Konferans Salonu',sub:'Tahta 03',status:'locked',online:false,last:'—',method:'—'},{id:'02',name:'Öğretmenler Odası',sub:'Tahta 02',status:'locked',online:true,last:'—',method:'—'}];
+let schools=[{id:1,name:'Okul 1',code:'OKUL1',contact:'Okul yöneticisi',email:'',status:'active'},{id:2,name:'Okul 2',code:'OKUL2',contact:'Okul yöneticisi',email:'',status:'active'},{id:3,name:'Yeni okul başvurusu',code:'YENI001',contact:'Başvuru yetkilisi',email:'',status:'pending'}];
+let notices=[{title:'Haftalık bilgilendirme',desc:'Haftanın önemli hatırlatmaları.'},{title:'Etkinlik takvimi',desc:'Yaklaşan etkinlikler.'},{title:'Önemli hatırlatma',desc:'Güncel hatırlatmalar.'}];
+let keys=[{name:'Ahmet Yılmaz',code:'TK-0001',active:true},{name:'Selin Demir',code:'TK-0002',active:true},{name:'Mehmet Kaya',code:'TK-0003',active:false}];
+function toast(m){$('toast').textContent=m;$('toast').classList.add('show');clearTimeout(window.toastTimer);window.toastTimer=setTimeout(()=>$('toast').classList.remove('show'),2300)}
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function setRole(r){loginRole=r;$('schoolLoginTab').classList.toggle('active',r==='school');$('adminLoginTab').classList.toggle('active',r==='admin');$('loginHeading').textContent=r==='admin'?'Admin girişi':'Okul girişi';$('loginIntro').textContent=r==='admin'?'Merkezi yönetim paneline giriş yapın.':'Okul kullanıcı adı ve şifrenizle giriş yapın.';$('loginUser').placeholder=r==='admin'?'admin':'okul1';$('loginError').style.display='none'}
+$('schoolLoginTab').onclick=()=>setRole('school');$('adminLoginTab').onclick=()=>setRole('admin');
+$('loginForm').onsubmit=e=>{e.preventDefault();const u=$('loginUser').value.trim().toLowerCase(),p=$('loginPass').value,a=accounts[u];if(!a||a.password!==p||a.role!==loginRole){$('loginError').textContent='Kullanıcı adı veya şifre hatalı.';$('loginError').style.display='block';return}loggedAccount=a;$('loginScreen').style.display='none';$('dashboardApp').style.display='flex';$('schoolNameSide').textContent=a.name;$('schoolNameTop').textContent=a.role==='admin'?'Admin':a.name;$('schoolCodeSide').textContent=a.role==='admin'?'Tüm kurumlar':'Kurum: '+a.code;$('schoolsNav').style.display=a.role==='admin'?'flex':'none';if(a.role==='admin'){go('schools');renderSchools()}else go('boards')};
+$('logoutBtn').onclick=()=>{$('loginForm').reset();$('dashboardApp').style.display='none';$('loginScreen').style.display='flex';loggedAccount=null;setRole('school')};
+function go(p){currentPage=p;document.querySelectorAll('.section').forEach(x=>x.classList.toggle('active',x.id==='page-'+p));document.querySelectorAll('.nav button[data-page]').forEach(x=>x.classList.toggle('active',x.dataset.page===p));const b=document.querySelector('.nav button[data-page="'+p+'"]');if(b)$('crumb').textContent=b.textContent.trim();$('sidebar').classList.remove('open')}
+document.querySelectorAll('.nav button[data-page]').forEach(b=>b.onclick=()=>{if(b.dataset.page==='schools'&&loggedAccount?.role!=='admin')return;go(b.dataset.page)});
+$('menuBtn').onclick=()=>$('sidebar').classList.toggle('open');
+function renderBoards(){const q=$('searchInput').value.toLocaleLowerCase('tr'),f=$('statusFilter').value,arr=boards.filter(b=>(b.name+' '+b.sub).toLocaleLowerCase('tr').includes(q)&&(f==='all'||(f==='offline'?!b.online:b.status===f)));$('boardRows').innerHTML=arr.map(b=>'<tr><td><div class="board"><div class="board-icon">▣</div><div><b>'+esc(b.name)+'</b><small>'+esc(b.sub)+'</small></div></div></td><td><span class="pill '+b.status+'">'+(b.status==='locked'?'Kilitli':'Açık')+'</span></td><td><span class="pill '+(b.online?'online':'offline')+'">'+(b.online?'Çevrimiçi':'Çevrimdışı')+'</span></td><td class="last">'+esc(b.last)+'<small>'+esc(b.method)+'</small></td><td><div class="row-actions"><button class="mini" data-board="toggle" data-id="'+b.id+'" '+(!b.online?'disabled':'')+'>'+(b.status==='locked'?'Aç':'Kilitle')+'</button><button class="mini" data-board="power" data-id="'+b.id+'" '+(!b.online?'disabled':'')+'>Kapat</button></div></td></tr>').join('');$('totalCount').textContent=boards.length;$('onlineCount').textContent=boards.filter(x=>x.online).length;$('lockedCount').textContent=boards.filter(x=>x.status==='locked').length;$('offlineCount').textContent=boards.filter(x=>!x.online).length;$('rowCount').textContent=arr.length+' tahta gösteriliyor';$('syncTime').textContent='az önce'}
+$('boardRows').onclick=e=>{const b=e.target.closest('[data-board]');if(!b)return;const x=boards.find(y=>y.id===b.dataset.id);if(!x)return;if(b.dataset.board==='toggle'){x.status=x.status==='locked'?'open':'locked';toast(x.name+' durumu değiştirildi (demo)')}else{if(confirm(x.name+' kapatılsın mı?'))toast('Kapatma komutu demo olarak işlendi')}renderBoards()};
+$('searchInput').oninput=renderBoards;$('statusFilter').onchange=renderBoards;$('refreshBtn').onclick=()=>{renderBoards();toast('Liste yenilendi')};$('lockAll').onclick=()=>{if(confirm('Çevrimiçi tüm tahtalar kilitlensin mi?')){boards.filter(x=>x.online).forEach(x=>x.status='locked');renderBoards();toast('Tüm çevrimiçi tahtalar kilitlendi (demo)')}};
+$('bellBtn').onclick=()=>toast('Yeni bildirim yok');
+function renderNotices(){$('noticeCards').innerHTML=notices.map((n,i)=>'<article class="notice-card"><div class="notice-thumb">DUYURU '+(i+1)+'</div><h3>'+esc(n.title)+'</h3><p>'+esc(n.desc)+'</p><div class="notice-meta"><span>Oluşturuldu</span><span>Yayında</span></div><div style="margin-top:10px;text-align:right"><button class="mini" data-notice-delete="'+i+'">Sil</button></div></article>').join('')}
+function openModal(){$('modalBackdrop').classList.add('show')};function closeModal(){$('modalBackdrop').classList.remove('show')}
+$('noticeQuick').onclick=()=>{go('notices');openModal()};$('newNotice').onclick=openModal;$('cancelModal').onclick=closeModal;$('modalBackdrop').onclick=e=>{if(e.target===$('modalBackdrop'))closeModal()};
+$('modalForm').onsubmit=e=>{e.preventDefault();notices.unshift({title:$('noticeTitle').value.trim(),desc:$('noticeText').value.trim()||'Açıklama eklenmedi'});renderNotices();$('modalForm').reset();closeModal();toast('Duyuru kaydedildi (demo)')};
+$('noticeCards').onclick=e=>{const b=e.target.closest('[data-notice-delete]');if(!b)return;notices.splice(+b.dataset.noticeDelete,1);renderNotices();toast('Duyuru silindi')};
+function renderKeys(){$('keyRows').innerHTML=keys.map((k,i)=>'<div class="key-row"><div><b>'+esc(k.name)+'</b><small>Öğretmen kodu: '+esc(k.code)+'</small></div><span class="pill '+(k.active?'online':'offline')+'">'+(k.active?'Aktif':'Pasif')+'</span><button class="mini" data-key="'+i+'">'+(k.active?'Pasife al':'Aktifleştir')+'</button></div>').join('')}
+$('keyRows').onclick=e=>{const b=e.target.closest('[data-key]');if(!b)return;keys[+b.dataset.key].active=!keys[+b.dataset.key].active;renderKeys();toast('Yetki durumu değiştirildi')};
+$('newKey').onclick=()=>{const n=prompt('Öğretmenin adı soyadı:');if(!n)return;keys.push({name:n,code:'TK-'+String(Date.now()).slice(-5),active:true});renderKeys();toast('Öğretmen anahtarı oluşturuldu (demo)')};
+function renderSchools(){const f=$('schoolFilter').value,arr=schools.filter(x=>f==='all'||x.status===f);$('schoolRows').innerHTML=arr.map(x=>'<tr><td><b>'+esc(x.name)+'</b></td><td>'+esc(x.code)+'</td><td>'+esc(x.contact)+'</td><td><span class="status-tag '+x.status+'">'+(x.status==='pending'?'Onay bekliyor':x.status==='active'?'Aktif':'Pasif')+'</span></td><td><div class="admin-actions">'+(x.status==='pending'?'<button class="approve" data-school="approve" data-id="'+x.id+'">Onayla</button>':'')+'<button data-school="edit" data-id="'+x.id+'">Düzenle</button>'+(x.status==='active'?'<button data-school="off" data-id="'+x.id+'">Pasife al</button>':x.status==='inactive'?'<button class="approve" data-school="on" data-id="'+x.id+'">Aktifleştir</button>':'')+'</div></td></tr>').join('');$('schoolTotal').textContent=schools.length;$('schoolPending').textContent=schools.filter(x=>x.status==='pending').length;$('schoolActive').textContent=schools.filter(x=>x.status==='active').length;$('schoolInactive').textContent=schools.filter(x=>x.status==='inactive').length;$('schoolRowCount').textContent=arr.length+' kurum gösteriliyor'}
+$('schoolFilter').onchange=renderSchools;$('refreshSchools').onclick=()=>{renderSchools();toast('Kurum listesi yenilendi')};$('schoolRows').onclick=e=>{const b=e.target.closest('[data-school]');if(!b)return;const x=schools.find(y=>y.id===+b.dataset.id);if(!x)return;const a=b.dataset.school;if(a==='approve'||a==='on')x.status='active';if(a==='off')x.status='inactive';if(a==='edit'){const n=prompt('Kurum adı:',x.name);if(n===null)return;x.name=n.trim()||x.name}renderSchools();toast('Kurum güncellendi (demo)')};
+$('saveSchedule').onclick=()=>{const v=[...$('page-schedule').querySelectorAll('input,select')].map(x=>x.value);try{localStorage.setItem('tk_schedule',JSON.stringify(v))}catch(e){}toast('Ders saatleri kaydedildi (bu tarayıcıda)')};
+renderBoards();renderNotices();renderKeys();renderSchools();
+</script>
