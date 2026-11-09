@@ -1,0 +1,72 @@
+{
+  "rules": {
+    "admins": {
+      "$uid": {
+        ".read": "auth != null && auth.uid === $uid"
+      }
+    },
+    "members": {
+      "$uid": {
+        ".read": "auth != null && (auth.uid === $uid || root.child('admins').child(auth.uid).val() === true)",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (auth.uid === $uid && !data.exists() && newData.parent().parent().child('schools').child(newData.child('school').val()).child('owner').val() === auth.uid))",
+        ".validate": "newData.child('school').isString()"
+      }
+    },
+    "schools": {
+      ".read": "auth != null && root.child('admins').child(auth.uid).val() === true",
+      "$code": {
+        ".read": "auth != null && root.child('members').child(auth.uid).child('school').val() === $code",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (!data.exists() && newData.child('owner').val() === auth.uid && newData.child('status').val() === 'pending'))",
+        ".validate": "$code.matches(/^[A-Z0-9]{3,12}$/) && newData.hasChildren(['name', 'status', 'owner'])",
+        "name": { ".validate": "newData.isString() && newData.val().length > 0 && newData.val().length <= 120" },
+        "status": { ".validate": "newData.val() === 'pending' || newData.val() === 'active' || newData.val() === 'inactive'" }
+      }
+    },
+    "boards": {
+      "$code": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        "$id": {
+          "name": { ".validate": "newData.isString() && newData.val().length <= 80" }
+        }
+      }
+    },
+    "state": {
+      "$code": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))"
+      }
+    },
+    "cmd": {
+      "$code": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        "$id": {
+          "action": { ".validate": "newData.val() === 'lock' || newData.val() === 'unlock' || newData.val() === 'shutdown'" }
+        }
+      }
+    },
+    "notices": {
+      "$code": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        "$id": {
+          "title": { ".validate": "newData.isString() && newData.val().length <= 120" },
+          "desc": { ".validate": "newData.isString() && newData.val().length <= 2000" }
+        }
+      }
+    },
+    "keys": {
+      "$code": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))"
+      }
+    },
+    "schedule": {
+      "$code": {
+        ".read": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))",
+        ".write": "auth != null && (root.child('admins').child(auth.uid).val() === true || (root.child('members').child(auth.uid).child('school').val() === $code && root.child('schools').child($code).child('status').val() === 'active'))"
+      }
+    }
+  }
+}
